@@ -23,9 +23,7 @@
 
           '';
           nativeBuildInputs = with pkgs; [ pkg-config ];
-          #nativeBuildInputs = with pkgs; [ pkg-config libGL libGLU ];
           buildInputs = with pkgs; [ 
-            ncurses
             vulkan-loader
             wayland
             wayland-protocols
@@ -46,7 +44,7 @@
 
         # `nix develop`
         devShell = with pkgs; mkShell {
-          buildInputs = [ cargo ncurses rustc rustfmt pre-commit rustPackages.clippy rust-analyzer ];
+          buildInputs = [ cargo rustc rustfmt pre-commit rustPackages.clippy rust-analyzer ];
           RUST_SRC_PATH = rustPlatform.rustLibSrc;
         };
       });

@@ -16,7 +16,9 @@
         # `nix build`
         defaultPackage = naersk-lib.buildPackage {
           src = ./.;
-          buildInputs = with pkgs; [ xorg.libX11 ];
+          buildInputs = with pkgs; [ 
+            ncurses
+          ];
         };
 
         # `nix run`
@@ -26,7 +28,7 @@
 
         # `nix develop`
         devShell = with pkgs; mkShell {
-          buildInputs = [ cargo rustc rustfmt pre-commit rustPackages.clippy rust-analyzer ];
+          buildInputs = [ cargo ncurses rustc rustfmt pre-commit rustPackages.clippy rust-analyzer ];
           RUST_SRC_PATH = rustPlatform.rustLibSrc;
         };
       });

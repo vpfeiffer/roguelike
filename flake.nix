@@ -16,7 +16,27 @@
         # `nix build`
         defaultPackage = naersk-lib.buildPackage {
           src = ./.;
-          buildInputs = with pkgs; [ xorg.libX11 ];
+          postFixUp = ''
+            wrapProgram $out/bin/rogue-like-tutorial \
+              --prefix LIBGL_DRIVERS_PATH ":" "${pkgs.mesa.drivers}/lib/dri" \
+              --prefix LD_LIBRARY_PATH ":" "${pkgs.mesa.drivers}/lib"
+
+          '';
+          nativeBuildInputs = with pkgs; [ pkg-config ];
+          #nativeBuildInputs = with pkgs; [ pkg-config libGL libGLU ];
+          buildInputs = with pkgs; [ 
+            ncurses
+            vulkan-loader
+            wayland
+            wayland-protocols
+            xorg.libX11 
+            xorg.libXcursor
+            xorg.libXrandr
+            xorg.libXi
+            libglvnd
+            libGL
+            libGLU
+          ];
         };
 
         # `nix run`
@@ -26,7 +46,7 @@
 
         # `nix develop`
         devShell = with pkgs; mkShell {
-          buildInputs = [ cargo rustc rustfmt pre-commit rustPackages.clippy rust-analyzer ];
+          buildInputs = [ cargo ncurses rustc rustfmt pre-commit rustPackages.clippy rust-analyzer ];
           RUST_SRC_PATH = rustPlatform.rustLibSrc;
         };
       });

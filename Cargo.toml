@@ -6,6 +6,11 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rltk = { version = "0.8.1", default-features = false, features = ["curses"] }
+rltk = { version = "0.8.1", default-features = false, features = ["crossterm"] }
 specs = "0.17.0"
 specs-derive = "0.4.1"
+
+[dependencies.bracket-terminal]
+version = "=0.8.1"
+default-features = false
+features = ["crossterm"]

@@ -1,8 +1,8 @@
 #![allow(unused)]
 use rltk::{GameState, Rltk, VirtualKeyCode, RGB};
 use specs::prelude::*;
-use specs_derive::Component;
 use std::cmp::{max, min};
+use specs_derive::Component;
 
 #[derive(Component)]
 struct Position {
@@ -17,19 +17,20 @@ struct Renderable {
     bg: RGB,
 }
 
+
+#[derive(Component)]
+struct LeftMover {}
+
+struct LeftWalker {}
+
 struct State {
     ecs: World,
 }
 
-/* By using  #[derive(Component)] you avoid the need to type the following in addition to the
- * struct
- * impl Component for Position {
- *      type Storage = VecStorage<Self>;
- *  } */
-
 impl GameState for State {
     fn tick(&mut self, ctx : &mut Rltk) {
-
+        ctx.cls();
+        self.run_systems();
         let positions = self.ecs.read_storage::<Position>();
         let renderables = self.ecs.read_storage::<Renderable>();
 
@@ -38,6 +39,36 @@ impl GameState for State {
         }
     }
 }
+
+
+
+impl<'a> System<'a> for LeftWalker {
+    type SystemData = (ReadStorage<'a, LeftMover>, WriteStorage<'a, Position>);
+
+    fn run(&mut self, (lefty, mut pos) : Self::SystemData){
+        for (_lefty,pos) in (&lefty, &mut pos).join() {
+            pos.x -= 1;
+            if pos.x < 0 { pos.x = 79; }
+        }
+
+    }
+}
+
+
+impl State {
+    fn run_systems(&mut self) {
+        let mut lw = LeftWalker{};
+        lw.run_now(&self.ecs);
+        self.ecs.maintain();
+    }
+}
+
+/* By using  #[derive(Component)] you avoid the need to type the following in addition to the
+ * struct
+ * impl Component for Position {
+ *      type Storage = VecStorage<Self>;
+ *  } */
+
 
 fn main() -> rltk::BError {
     use rltk::RltkBuilder;
@@ -48,7 +79,9 @@ fn main() -> rltk::BError {
     let mut gs = State { ecs: World::new() };
     gs.ecs.register::<Position>();
     gs.ecs.register::<Renderable>();
+    gs.ecs.register::<LeftMover>();
 
+    // PC
     gs.ecs
     .create_entity()
     .with(Position { x: 40, y: 25 })
@@ -59,6 +92,7 @@ fn main() -> rltk::BError {
     })
     .build();
 
+    // NPCs
     for i in 0..10 {
         gs.ecs
         .create_entity()
@@ -68,6 +102,7 @@ fn main() -> rltk::BError {
             fg: RGB::named(rltk::RED),
             bg: RGB::named(rltk::BLACK),
         })
+        .with(LeftMover{})
         .build();
     }
     rltk::main_loop(context, gs)

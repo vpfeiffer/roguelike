@@ -28,7 +28,6 @@ struct State {
  *  } */
 
 fn main() {
-    println!("Hello, world!");
 
     let mut gs = State { ecs: World::new() };
     gs.ecs.register::<Position>();

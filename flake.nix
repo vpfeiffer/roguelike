@@ -11,17 +11,20 @@
       let
         pkgs = import nixpkgs { inherit system; };
         naersk-lib = pkgs.callPackage naersk { };
+        libPath = with pkgs; lib.makeLibraryPath [
+          libGL
+          libxkbcommon
+          wayland
+          xorg.libX11
+          xorg.libXcursor
+          xorg.libXi
+          xorg.libXrandr
+        ];
       in
       {
         # `nix build`
         defaultPackage = naersk-lib.buildPackage {
           src = ./.;
-          postFixUp = ''
-            wrapProgram $out/bin/rogue-like-tutorial \
-              --prefix LIBGL_DRIVERS_PATH ":" "${pkgs.mesa.drivers}/lib/dri" \
-              --prefix LD_LIBRARY_PATH ":" "${pkgs.mesa.drivers}/lib"
-
-          '';
           nativeBuildInputs = with pkgs; [ pkg-config ];
           buildInputs = with pkgs; [ 
             vulkan-loader
@@ -31,10 +34,16 @@
             xorg.libXcursor
             xorg.libXrandr
             xorg.libXi
+            xorg.libxcb
             libglvnd
             libGL
             libGLU
           ];
+          postInstall = ''
+            wrapProgram $out/bin/rogue-like-tutorial \
+              --prefix LD_LIBRARY_PATH ":" "${libPath}"
+
+          '';
         };
 
         # `nix run`
@@ -52,8 +61,10 @@
             rustPackages.clippy 
             rust-analyzer
             tokei
+            xorg.libxcb
           ];
           RUST_SRC_PATH = rustPlatform.rustLibSrc;
+          LD_LIBRARY_PATH = libPath;
         };
       });
 }

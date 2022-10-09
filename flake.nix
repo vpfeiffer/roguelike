@@ -28,7 +28,16 @@
 
         # `nix develop`
         devShell = with pkgs; mkShell {
-          buildInputs = [ cargo ncurses rustc rustfmt pre-commit rustPackages.clippy rust-analyzer ];
+          buildInputs = [ 
+            cargo 
+            ncurses 
+            rustc 
+            rustfmt 
+            pre-commit 
+            rustPackages.clippy 
+            rust-analyzer
+            tokei
+          ];
           RUST_SRC_PATH = rustPlatform.rustLibSrc;
         };
       });

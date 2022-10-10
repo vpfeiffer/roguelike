@@ -25,19 +25,9 @@
         # `nix build`
         defaultPackage = naersk-lib.buildPackage {
           src = ./.;
-          nativeBuildInputs = with pkgs; [ pkg-config ];
+          nativeBuildInputs = with pkgs; [ pkgs.makeWrapper ];
           buildInputs = with pkgs; [ 
-            vulkan-loader
-            wayland
-            wayland-protocols
-            xorg.libX11 
-            xorg.libXcursor
-            xorg.libXrandr
-            xorg.libXi
             xorg.libxcb
-            libglvnd
-            libGL
-            libGLU
           ];
           postInstall = ''
             wrapProgram $out/bin/rogue-like-tutorial \

@@ -17,6 +17,10 @@ struct Renderable {
     bg: RGB,
 }
 
+#[derive(PartialEq, Copy, Clone)]
+enum TileType {
+    Wall, Floor
+}
 
 #[derive(Component)]
 struct LeftMover {}

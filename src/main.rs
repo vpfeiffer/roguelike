@@ -51,7 +51,7 @@ impl GameState for State {
 
 
 
-impl<'a> System<'a> for LeftWalker {
+impl <'a> System<'a> for LeftWalker {
     type SystemData = (ReadStorage<'a, LeftMover>, WriteStorage<'a, Position>);
 
     fn run(&mut self, (lefty, mut pos) : Self::SystemData){

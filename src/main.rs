@@ -100,10 +100,10 @@ fn player_input(gs: &mut State, ctx: &mut Rltk) {
             VirtualKeyCode::L => try_move_player(1, 0, &mut gs.ecs),
             VirtualKeyCode::K => try_move_player(0, -1, &mut gs.ecs),
             VirtualKeyCode::J => try_move_player(0, 1, &mut gs.ecs),
-            //VirtualKeyCode::Y => try_move_player(-1, -1, &mut gs.ecs),
-            //VirtualKeyCode::U => try_move_player(1, -1, &mut gs.ecs),
-            //VirtualKeyCode::B => try_move_player(-1, 1, &mut gs.ecs),
-            //VirtualKeyCode::N => try_move_player(1, 1, &mut gs.ecs),
+            VirtualKeyCode::Y => try_move_player(-1, -1, &mut gs.ecs),
+            VirtualKeyCode::U => try_move_player(1, -1, &mut gs.ecs),
+            VirtualKeyCode::B => try_move_player(-1, 1, &mut gs.ecs),
+            VirtualKeyCode::N => try_move_player(1, 1, &mut gs.ecs),
             _ => {}
         },
     }

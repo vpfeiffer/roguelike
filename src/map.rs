@@ -14,7 +14,8 @@ pub fn xy_idx(x: i32, y: i32) -> usize {
     (y as usize * WIDTH) + x as usize
 }
 
-pub fn new_map() -> Vec<TileType> {
+/// Make a map with a solid boundary around the permiter and 40 randomly placed walls
+pub fn new_map_test() -> Vec<TileType> {
     let mut map = vec![TileType::Floor; WIDTH*HEIGHT];
 
     // Make the boundaries walls

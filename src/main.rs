@@ -75,7 +75,7 @@ fn main() -> rltk::BError {
     gs.ecs.register::<Renderable>();
     gs.ecs.register::<LeftMover>();
     gs.ecs.register::<Player>();
-    gs.ecs.insert(new_map());
+    gs.ecs.insert(new_map_test());
 
     // PC
     gs.ecs .create_entity() .with(Position { x: 40, y: 25 }) .with(Renderable {

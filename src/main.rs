@@ -9,6 +9,9 @@ mod map;
 pub use map::*;
 mod player;
 pub use player::*;
+mod rect;
+pub use rect::Rect;
+
 
 #[derive(Component)]
 struct LeftMover {}
@@ -75,7 +78,7 @@ fn main() -> rltk::BError {
     gs.ecs.register::<Renderable>();
     gs.ecs.register::<LeftMover>();
     gs.ecs.register::<Player>();
-    gs.ecs.insert(new_map_test());
+    gs.ecs.insert(new_map_rooms_and_corridors());
 
     // PC
     gs.ecs .create_entity() .with(Position { x: 40, y: 25 }) .with(Renderable {

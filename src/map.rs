@@ -63,6 +63,7 @@ fn apply_room_to_map(room: &Rect, map: &mut [TileType]) {
         }
     }
 }
+
 pub fn draw_map(map: &[TileType], ctx : &mut Rltk) {
     let mut y = 0;
     let mut x = 0;

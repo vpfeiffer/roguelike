@@ -58,6 +58,7 @@ pub fn new_map_rooms_and_corridors() -> Vec<TileType> {
     for _ in 0..MAX_ROOMS {
         let w = rng.range(MIN_SIZE, MAX_SIZE);
         let h = rng.range(MIN_SIZE, MAX_SIZE);
+        // Refactor the following two lines to use rng.range and subtract just 1 instead
         let x = rng.roll_dice(1, WIDTH as i32 - w - 1) - 1;
         let y = rng.roll_dice(1, HEIGHT as i32 - h - 1) - 1;
         let new_room = Rect::new(x, y, w, h);
@@ -69,6 +70,20 @@ pub fn new_map_rooms_and_corridors() -> Vec<TileType> {
         }
         if not_intersect {
             apply_room_to_map(&new_room, &mut map);
+            
+            // Join rooms with corridors
+            if !rooms.is_empty() {
+                let (new_x, new_y) = new_room.center();
+                let (prev_x, prev_y) = rooms[rooms.len()-1].center();
+                if rng.range(0, 2) == 1 {
+                    apply_horizontal_tunnel(&mut map, prev_x, new_x, prev_y);
+                    apply_vertical_tunnel(&mut map, prev_y, new_y, new_x);
+                } else {
+                    apply_vertical_tunnel(&mut map, prev_y, new_y, prev_x);
+                    apply_horizontal_tunnel(&mut map, prev_x, new_x, new_y);
+                }
+
+            }
             rooms.push(new_room);
         }
     }

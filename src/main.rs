@@ -11,8 +11,6 @@ mod player;
 pub use player::*;
 mod rect;
 pub use rect::Rect;
-mod visibility_system;
-use visibility_system::VisibilitySystem;
 
 
 #[derive(Component)]
@@ -27,8 +25,6 @@ pub struct State {
 
 impl State {
     fn run_systems(&mut self) {
-        let mut vis = VisibilitySystem{};
-        vis.run_now(&self.ecs);
         self.ecs.maintain();
     }
 }

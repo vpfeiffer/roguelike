@@ -20,13 +20,11 @@ fn main() {
 
     // load game save if it exists
 
-    // some loop
-
     let mut user_input = String::new();
 
     while user_input != "q" {
         user_input = get_user_input().unwrap();
-        println!("game is running...\n");
+        println!("game is running...");
         println!("You typed: {}", user_input);
     }
 

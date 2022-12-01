@@ -7,9 +7,8 @@ pub use game_entities::*;
 fn get_user_input() -> io::Result<(String)> {
     let mut user_input = String::new();
     io::stdin().read_line(&mut user_input)?;
-    println!("You typed: {}", user_input.trim());
 
-    Ok(user_input)
+    Ok(user_input.trim().to_owned())
 
 }
 
@@ -23,10 +22,12 @@ fn main() {
 
     // some loop
 
+    let mut user_input = String::new();
 
-    while get_user_input().unwrap().trim() != "q" {
+    while user_input != "q" {
+        user_input = get_user_input().unwrap();
         println!("game is running...\n");
-
+        println!("You typed: {}", user_input);
     }
 
 }

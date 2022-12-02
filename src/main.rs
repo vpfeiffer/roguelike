@@ -26,6 +26,11 @@ fn main() {
         user_input = get_user_input().unwrap();
         println!("game is running...");
         println!("You typed: {}", user_input);
+        println!("###########");
+        println!("#.........#");
+        println!("#....@....#");
+        println!("#.........#");
+        println!("###########");
     }
 
 }

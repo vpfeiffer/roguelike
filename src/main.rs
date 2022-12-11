@@ -81,7 +81,7 @@ fn determine_player_movement(map: &mut Array2<char>, user_input: &str, player: &
         "j" => move_player(map, Movement::Down, player),
         "k" => move_player(map, Movement::Up, player),
         "h" => move_player(map, Movement::Left, player),
-        "l" => move_player(map, Movement::Down, player),
+        "l" => move_player(map, Movement::Right, player),
         "y" => move_player(map, Movement::DiagonalUpLeft, player),
         "u" => move_player(map, Movement::DiagonalUpRight, player),
         "b" => move_player(map, Movement::DiagonalDownLeft, player),

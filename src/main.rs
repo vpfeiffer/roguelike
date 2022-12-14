@@ -92,8 +92,6 @@ fn determine_player_movement(map: &mut Array2<char>, user_input: &str, player: &
 
 fn main() {
     // Note: use crossterm or termion for synchronous key press event handling
-    //if user_input to do: compare string, compare the input with what the string is for ESC
-
 
     // player struct
     let mut player = GameEntity {

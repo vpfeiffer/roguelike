@@ -1,6 +1,7 @@
 #![allow(unused)]
-use std::io::{self, Read};
+use colored::Colorize;
 use ndarray::prelude::*;
+use std::io::{self, Read};
 
 mod game_entities;
 pub use game_entities::*;
@@ -16,67 +17,80 @@ enum Movement {
     DiagonalDownRight,
 }
 
+enum Tile {
+    Floor,
+    Wall,
+    Player,
+    NPC,
+}
+
+type Map = Array2<&'static str>;
+
 fn get_user_input() -> io::Result<(String)> {
     let mut user_input = String::new();
     io::stdin().read_line(&mut user_input)?;
 
     Ok(user_input.trim().to_owned())
-
 }
 
-fn print_map(map: &Array2<char>) {
-
-    for row in map.rows()  {
+fn print_map(map: &Map) {
+    for row in map.rows() {
         for tile in row {
+            //match tile {
+                //Tile::Wall => print!("{tile}"),
+
+
+
+            //}
             print!("{tile}");
         }
         print!("\n");
     }
 }
 
-fn move_player(map: &mut Array2<char>, direction:  Movement, player: &mut GameEntity) {
-    map[[player.x, player.y]] = '.';
+fn move_player(map: &mut Map, direction: Movement, player: &mut GameEntity) {
+    map[[player.x, player.y]] = ".";
     match direction {
         Movement::Down => {
-            map[[player.x+1,player.y]] = '@';
+            map[[player.x + 1, player.y]] = "@";
             player.x += 1;
-        },
+        }
         Movement::Up => {
-            map[[player.x-1,player.y]] = '@';
+            map[[player.x - 1, player.y]] = "@";
             player.x -= 1;
-        },
+        }
         Movement::Left => {
-            map[[player.x,player.y-1]] = '@';
+            map[[player.x, player.y - 1]] = "@";
             player.y -= 1;
-        },
+        }
         Movement::Right => {
-            map[[player.x,player.y+1]] = '@';
+            map[[player.x, player.y + 1]] = "@";
             player.y += 1;
-        },
+        }
         Movement::DiagonalUpLeft => {
-            map[[player.x-1,player.y-1]] = '@';
+            map[[player.x - 1, player.y - 1]] = "@";
             player.y -= 1;
             player.x -= 1;
-        },
+        }
         Movement::DiagonalUpRight => {
-            map[[player.x-1,player.y+1]] = '@';
+            map[[player.x - 1, player.y + 1]] = "@";
             player.y += 1;
             player.x -= 1;
-        },
+        }
         Movement::DiagonalDownLeft => {
-            map[[player.x+1,player.y-1]] = '@';
+            map[[player.x + 1, player.y - 1]] = "@";
             player.y -= 1;
             player.x += 1;
-        },
+        }
         Movement::DiagonalDownRight => {
-            map[[player.x+1,player.y+1]] = '@';
+            map[[player.x + 1, player.y + 1]] = "@";
             player.y += 1;
             player.x += 1;
-        },
+        }
     }
 }
 
-fn determine_player_movement(map: &mut Array2<char>, user_input: &str, player: &mut GameEntity) {
+fn determine_player_movement(map: &mut Map, user_input: &str, player: &mut GameEntity) {
     match user_input {
         "j" => move_player(map, Movement::Down, player),
         "k" => move_player(map, Movement::Up, player),
@@ -86,18 +100,20 @@ fn determine_player_movement(map: &mut Array2<char>, user_input: &str, player: &
         "u" => move_player(map, Movement::DiagonalUpRight, player),
         "b" => move_player(map, Movement::DiagonalDownLeft, player),
         "n" => move_player(map, Movement::DiagonalDownRight, player),
-        _ => {},
+        _ => {}
     }
 }
+
+//fn create_room() {
+// fill in this function
+
+//}
 
 fn main() {
     // Note: use crossterm or termion for synchronous key press event handling
 
     // player struct
-    let mut player = GameEntity {
-        x: 3,
-        y: 3,
-    };
+    let mut player = GameEntity { x: 3, y: 3 };
 
     // load game save if it exists
 
@@ -105,14 +121,17 @@ fn main() {
 
     // make this an array of chars
     //let mut map = Array2::<char>::default((6,8));
+    //
 
     //map.fill('.');
-    let mut map = arr2(&[['#','#','#','#','#','#'],
-                           ['#','.','.','.','.','#'],
-                           ['#','.','.','.','.','#'],
-                           ['#','.','.','@','.','#'],
-                           ['#','.','.','.','.','#'],
-                           ['#','#','#','#','#','#']]);
+    let mut map = arr2(&[
+        ["#", "#", "#", "#", "#", "#"],
+        ["#", ".", ".", ".", ".", "#"],
+        ["#", ".", ".", ".", ".", "#"],
+        ["#", ".", ".", "@", ".", "#"],
+        ["#", ".", ".", ".", ".", "#"],
+        ["#", "#", "#", "#", "#", "#"],
+    ]);
 
     while user_input != "q" {
         user_input = get_user_input().unwrap();
@@ -121,5 +140,4 @@ fn main() {
         determine_player_movement(&mut map, &user_input, &mut player);
         print_map(&map);
     }
-
 }

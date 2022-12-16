@@ -17,6 +17,7 @@ enum Movement {
     DiagonalDownRight,
 }
 
+#[derive(Clone)]
 enum Tile {
     Floor,
     Wall,
@@ -24,7 +25,7 @@ enum Tile {
     NPC,
 }
 
-type Map = Array2<&'static str>;
+type Map = Array2<Tile>;
 
 fn get_user_input() -> io::Result<(String)> {
     let mut user_input = String::new();
@@ -36,54 +37,54 @@ fn get_user_input() -> io::Result<(String)> {
 fn print_map(map: &Map) {
     for row in map.rows() {
         for tile in row {
-            //match tile {
-                //Tile::Wall => print!("{tile}"),
-
-
-
-            //}
-            print!("{tile}");
+            match tile {
+                Tile::Wall => print!("#"),
+                Tile::Floor => print!("."),
+                Tile::Player => print!("@"),
+                Tile::NPC => print!("&"),
+            }
+            //print!("{tile}");
         }
         print!("\n");
     }
 }
 
 fn move_player(map: &mut Map, direction: Movement, player: &mut GameEntity) {
-    map[[player.x, player.y]] = ".";
+    map[[player.x, player.y]] = Tile::Floor;
     match direction {
         Movement::Down => {
-            map[[player.x + 1, player.y]] = "@";
+            map[[player.x + 1, player.y]] = Tile::Player;
             player.x += 1;
         }
         Movement::Up => {
-            map[[player.x - 1, player.y]] = "@";
+            map[[player.x - 1, player.y]] = Tile::Player;
             player.x -= 1;
         }
         Movement::Left => {
-            map[[player.x, player.y - 1]] = "@";
+            map[[player.x, player.y - 1]] = Tile::Player;
             player.y -= 1;
         }
         Movement::Right => {
-            map[[player.x, player.y + 1]] = "@";
+            map[[player.x, player.y + 1]] = Tile::Player;
             player.y += 1;
         }
         Movement::DiagonalUpLeft => {
-            map[[player.x - 1, player.y - 1]] = "@";
+            map[[player.x - 1, player.y - 1]] = Tile::Player;
             player.y -= 1;
             player.x -= 1;
         }
         Movement::DiagonalUpRight => {
-            map[[player.x - 1, player.y + 1]] = "@";
+            map[[player.x - 1, player.y + 1]] = Tile::Player;
             player.y += 1;
             player.x -= 1;
         }
         Movement::DiagonalDownLeft => {
-            map[[player.x + 1, player.y - 1]] = "@";
+            map[[player.x + 1, player.y - 1]] = Tile::Player;
             player.y -= 1;
             player.x += 1;
         }
         Movement::DiagonalDownRight => {
-            map[[player.x + 1, player.y + 1]] = "@";
+            map[[player.x + 1, player.y + 1]] = Tile::Player;
             player.y += 1;
             player.x += 1;
         }
@@ -125,12 +126,12 @@ fn main() {
 
     //map.fill('.');
     let mut map = arr2(&[
-        ["#", "#", "#", "#", "#", "#"],
-        ["#", ".", ".", ".", ".", "#"],
-        ["#", ".", ".", ".", ".", "#"],
-        ["#", ".", ".", "@", ".", "#"],
-        ["#", ".", ".", ".", ".", "#"],
-        ["#", "#", "#", "#", "#", "#"],
+        [Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall],
+        [Tile::Wall, Tile::Floor, Tile::Floor, Tile::Floor, Tile::Floor, Tile::Wall],
+        [Tile::Wall, Tile::Floor, Tile::Floor, Tile::Floor, Tile::Floor, Tile::Wall],
+        [Tile::Wall, Tile::Floor, Tile::Floor, Tile::Player, Tile::Floor, Tile::Wall],
+        [Tile::Wall, Tile::Floor, Tile::Floor, Tile::Floor, Tile::Floor, Tile::Wall],
+        [Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall],
     ]);
 
     while user_input != "q" {

@@ -1,7 +1,7 @@
 #![allow(unused)]
 use colored::Colorize;
 use ndarray::prelude::*;
-use std::io::{self, Read};
+use std::{io::{self, Read}, fmt::format};
 
 mod game_entities;
 pub use game_entities::*;
@@ -38,12 +38,11 @@ fn print_map(map: &Map) {
     for row in map.rows() {
         for tile in row {
             match tile {
-                Tile::Wall => print!("#"),
-                Tile::Floor => print!("."),
-                Tile::Player => print!("@"),
-                Tile::NPC => print!("&"),
+                Tile::Wall => print!("{}", format!("#").green()),
+                Tile::Floor => print!("{}", format!(".").white().dimmed()),
+                Tile::Player => print!("{}", format!("@").blue()),
+                Tile::NPC => print!("{}", format!("&").red()),
             }
-            //print!("{tile}");
         }
         print!("\n");
     }

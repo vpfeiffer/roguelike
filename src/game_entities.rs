@@ -1,4 +1,5 @@
-pub struct Coordinates {
-    pub x: i32,
-    pub y: i32,
+pub struct GameEntity {
+    pub x: usize,
+    pub y: usize,
 }
+

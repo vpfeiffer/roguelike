@@ -1,7 +1,8 @@
 #![allow(unused)]
 use colored::Colorize;
 use ndarray::prelude::*;
-use std::{io::{self, Read}, fmt::format};
+use std::{io::{self, Read, Write, stdout}, fmt::{format, write}};
+use crossterm::{event::{read, Event, KeyCode}, terminal::enable_raw_mode};
 
 mod game_entities;
 pub use game_entities::*;
@@ -27,24 +28,19 @@ enum Tile {
 
 type Map = Array2<Tile>;
 
-fn get_user_input() -> io::Result<(String)> {
-    let mut user_input = String::new();
-    io::stdin().read_line(&mut user_input)?;
-
-    Ok(user_input.trim().to_owned())
-}
-
 fn print_map(map: &Map) {
+    let mut w = io::BufWriter::new(io::stdout());
+    write!(w, "\r");
     for row in map.rows() {
         for tile in row {
             match tile {
-                Tile::Wall => print!("{}", format!("#").green()),
-                Tile::Floor => print!("{}", format!(".").white().dimmed()),
-                Tile::Player => print!("{}", format!("@").blue()),
-                Tile::NPC => print!("{}", format!("&").red()),
-            }
+                Tile::Wall => write!(w, "{}", format!("#").green()),
+                Tile::Floor => write!(w, "{}", format!(".").white().dimmed()),
+                Tile::Player => write!(w, "{}", format!("@").blue()),
+                Tile::NPC => write!(w, "{}", format!("&").red()),
+            };
         }
-        print!("\n");
+        write!(w, "\n\r");
     }
 }
 
@@ -90,16 +86,16 @@ fn move_player(map: &mut Map, direction: Movement, player: &mut GameEntity) {
     }
 }
 
-fn determine_player_movement(map: &mut Map, user_input: &str, player: &mut GameEntity) {
+fn determine_player_movement(map: &mut Map, user_input: &Option<KeyCode>, player: &mut GameEntity) {
     match user_input {
-        "j" => move_player(map, Movement::Down, player),
-        "k" => move_player(map, Movement::Up, player),
-        "h" => move_player(map, Movement::Left, player),
-        "l" => move_player(map, Movement::Right, player),
-        "y" => move_player(map, Movement::DiagonalUpLeft, player),
-        "u" => move_player(map, Movement::DiagonalUpRight, player),
-        "b" => move_player(map, Movement::DiagonalDownLeft, player),
-        "n" => move_player(map, Movement::DiagonalDownRight, player),
+        Some(KeyCode::Char('j')) => move_player(map, Movement::Down, player),
+        Some(KeyCode::Char('k')) => move_player(map, Movement::Up, player),
+        Some(KeyCode::Char('h')) => move_player(map, Movement::Left, player),
+        Some(KeyCode::Char('l')) => move_player(map, Movement::Right, player),
+        Some(KeyCode::Char('y')) => move_player(map, Movement::DiagonalUpLeft, player),
+        Some(KeyCode::Char('u')) => move_player(map, Movement::DiagonalUpRight, player),
+        Some(KeyCode::Char('b')) => move_player(map, Movement::DiagonalDownLeft, player),
+        Some(KeyCode::Char('n'))=> move_player(map, Movement::DiagonalDownRight, player),
         _ => {}
     }
 }
@@ -109,15 +105,22 @@ fn determine_player_movement(map: &mut Map, user_input: &str, player: &mut GameE
 
 //}
 
-fn main() {
-    // Note: use crossterm or termion for synchronous key press event handling
+fn keyboard_event() -> Option<KeyCode> {
+//fn keyboard_event() -> crossterm::event::KeyCode {
+    match read().unwrap() {
+        Event::Key(event) => Some(event.code),
+        //Event::Resize(width, height) => print!("New size {}x{}", width, height),
+        _ => None
+    }
+}
 
-    // player struct
+fn main() {
     let mut player = GameEntity { x: 3, y: 3 };
 
     // load game save if it exists
 
-    let mut user_input = String::new();
+    let mut user_input = None;
+    //let mut user_input = String::new();
 
     // make this an array of chars
     //let mut map = Array2::<char>::default((6,8));
@@ -133,10 +136,9 @@ fn main() {
         [Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall],
     ]);
 
-    while user_input != "q" {
-        user_input = get_user_input().unwrap();
-        println!("game is running...");
-        println!("You typed: {}", user_input);
+    enable_raw_mode();
+    while user_input != Some(KeyCode::Char('q')) {
+        user_input = keyboard_event();
         determine_player_movement(&mut map, &user_input, &mut player);
         print_map(&map);
     }

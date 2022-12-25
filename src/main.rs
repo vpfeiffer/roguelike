@@ -2,10 +2,13 @@
 use colored::Colorize;
 use ndarray::prelude::*;
 use std::{io::{self, Read, Write, stdout}, fmt::{format, write}};
-use crossterm::{event::{read, Event, KeyCode}, terminal::enable_raw_mode};
+use crossterm::{event::{read, Event, KeyCode}, terminal::{enable_raw_mode, disable_raw_mode}};
+use rand::{thread_rng, Rng};
 
 mod game_entities;
 pub use game_entities::*;
+mod map_entities;
+pub use map_entities::*;
 
 enum Movement {
     Up,
@@ -26,6 +29,12 @@ enum Tile {
     NPC,
 }
 
+impl Default for Tile {
+    fn default() -> Self {
+        Tile::Floor
+    }
+}
+
 type Map = Array2<Tile>;
 
 fn print_map(map: &Map) {
@@ -42,6 +51,7 @@ fn print_map(map: &Map) {
         }
         write!(w, "\n\r");
     }
+    write!(w, "\n\r");
 }
 
 fn move_player(map: &mut Map, direction: Movement, player: &mut GameEntity) {
@@ -122,19 +132,39 @@ fn main() {
     let mut user_input = None;
     //let mut user_input = String::new();
 
-    // make this an array of chars
-    //let mut map = Array2::<char>::default((6,8));
-    //
+    let mut rng = thread_rng();
+    let width = rng.gen_range(4..10);
+    let height = rng.gen_range(4..10);
 
+    //let mut map = Array2::default((width,height));
+    let mut map = Array::from_shape_fn((width, height), |(i, j)| {
+            if i == 0 || j == 0 || i == width-1 || j == height-1 {
+                Tile::Wall
+            }
+            else if i == width-2 && j == height-2 {
+                Tile::Player
+            }
+            else {
+                Tile::Floor
+            }
+        });
+    //map[[width-2,height-2]] = Tile::Player;
+    // use from_shape_fn to create the randomly sized room
+    // use a closure or a function as the second argument
+    // let ij_table = Array::from_shape_fn((3, 3), |(i, j)| (1 + i) * (1 + j));
+    // In my case i or j would have to be 0 or width-1 or height-1.
+    // Everything else would be a floor tile
+
+    
     //map.fill('.');
-    let mut map = arr2(&[
-        [Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall],
-        [Tile::Wall, Tile::Floor, Tile::Floor, Tile::Floor, Tile::Floor, Tile::Wall],
-        [Tile::Wall, Tile::Floor, Tile::Floor, Tile::Floor, Tile::Floor, Tile::Wall],
-        [Tile::Wall, Tile::Floor, Tile::Floor, Tile::Player, Tile::Floor, Tile::Wall],
-        [Tile::Wall, Tile::Floor, Tile::Floor, Tile::Floor, Tile::Floor, Tile::Wall],
-        [Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall],
-    ]);
+    //let mut map = arr2(&[
+        //[Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall],
+        //[Tile::Wall, Tile::Floor, Tile::Floor, Tile::Floor, Tile::Floor, Tile::Wall],
+        //[Tile::Wall, Tile::Floor, Tile::Floor, Tile::Floor, Tile::Floor, Tile::Wall],
+        //[Tile::Wall, Tile::Floor, Tile::Floor, Tile::Player, Tile::Floor, Tile::Wall],
+        //[Tile::Wall, Tile::Floor, Tile::Floor, Tile::Floor, Tile::Floor, Tile::Wall],
+        //[Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall],
+    //]);
 
     enable_raw_mode();
     while user_input != Some(KeyCode::Char('q')) {
@@ -142,4 +172,5 @@ fn main() {
         determine_player_movement(&mut map, &user_input, &mut player);
         print_map(&map);
     }
+    disable_raw_mode();
 }

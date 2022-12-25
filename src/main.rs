@@ -110,13 +110,7 @@ fn determine_player_movement(map: &mut Map, user_input: &Option<KeyCode>, player
     }
 }
 
-//fn create_room() {
-// fill in this function
-
-//}
-
 fn keyboard_event() -> Option<KeyCode> {
-//fn keyboard_event() -> crossterm::event::KeyCode {
     match read().unwrap() {
         Event::Key(event) => Some(event.code),
         //Event::Resize(width, height) => print!("New size {}x{}", width, height),
@@ -130,13 +124,10 @@ fn main() {
     // load game save if it exists
 
     let mut user_input = None;
-    //let mut user_input = String::new();
-
     let mut rng = thread_rng();
     let width = rng.gen_range(4..10);
     let height = rng.gen_range(4..10);
 
-    //let mut map = Array2::default((width,height));
     let mut map = Array::from_shape_fn((width, height), |(i, j)| {
             if i == 0 || j == 0 || i == width-1 || j == height-1 {
                 Tile::Wall
@@ -148,23 +139,6 @@ fn main() {
                 Tile::Floor
             }
         });
-    //map[[width-2,height-2]] = Tile::Player;
-    // use from_shape_fn to create the randomly sized room
-    // use a closure or a function as the second argument
-    // let ij_table = Array::from_shape_fn((3, 3), |(i, j)| (1 + i) * (1 + j));
-    // In my case i or j would have to be 0 or width-1 or height-1.
-    // Everything else would be a floor tile
-
-    
-    //map.fill('.');
-    //let mut map = arr2(&[
-        //[Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall],
-        //[Tile::Wall, Tile::Floor, Tile::Floor, Tile::Floor, Tile::Floor, Tile::Wall],
-        //[Tile::Wall, Tile::Floor, Tile::Floor, Tile::Floor, Tile::Floor, Tile::Wall],
-        //[Tile::Wall, Tile::Floor, Tile::Floor, Tile::Player, Tile::Floor, Tile::Wall],
-        //[Tile::Wall, Tile::Floor, Tile::Floor, Tile::Floor, Tile::Floor, Tile::Wall],
-        //[Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall],
-    //]);
 
     enable_raw_mode();
     while user_input != Some(KeyCode::Char('q')) {

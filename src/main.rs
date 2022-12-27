@@ -120,19 +120,22 @@ fn keyboard_event() -> Option<KeyCode> {
 
 fn main() {
     let mut player = GameEntity { x: 3, y: 3 };
+    // TODO: fix bug where player shows up twice on startup
+    // search the map for the player every time you call move_player
+    // to find the player instead of storing that data in GameEntity.
 
     // load game save if it exists
 
     let mut user_input = None;
     let mut rng = thread_rng();
-    let width = rng.gen_range(4..10);
-    let height = rng.gen_range(4..10);
+    let width = rng.gen_range(6..14);
+    let height = rng.gen_range(6..10);
 
-    let mut map = Array::from_shape_fn((width, height), |(i, j)| {
-            if i == 0 || j == 0 || i == width-1 || j == height-1 {
+    let mut map = Array::from_shape_fn((height, width), |(i, j)| {
+            if i == 0 || j == 0 || j == width-1 || i == height-1 {
                 Tile::Wall
             }
-            else if i == width-2 && j == height-2 {
+            else if j == width-2 && i == height-2 {
                 Tile::Player
             }
             else {

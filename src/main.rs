@@ -21,7 +21,7 @@ enum Movement {
     DiagonalDownRight,
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 enum Tile {
     Floor,
     Wall,
@@ -55,43 +55,33 @@ fn print_map(map: &Map) {
 }
 
 fn move_player(map: &mut Map, direction: Movement, player: &mut GameEntity) {
-    map[[player.x, player.y]] = Tile::Floor;
+    let player_location = find_player(map).unwrap();
+
+    map[[player_location.0, player_location.1]] = Tile::Floor;
     match direction {
         Movement::Down => {
-            map[[player.x + 1, player.y]] = Tile::Player;
-            player.x += 1;
+            map[[player_location.0 + 1, player_location.1]] = Tile::Player;
         }
         Movement::Up => {
-            map[[player.x - 1, player.y]] = Tile::Player;
-            player.x -= 1;
+            map[[player_location.0 - 1, player_location.1]] = Tile::Player;
         }
         Movement::Left => {
-            map[[player.x, player.y - 1]] = Tile::Player;
-            player.y -= 1;
+            map[[player_location.0, player_location.1 - 1]] = Tile::Player;
         }
         Movement::Right => {
-            map[[player.x, player.y + 1]] = Tile::Player;
-            player.y += 1;
+            map[[player_location.0, player_location.1 + 1]] = Tile::Player;
         }
         Movement::DiagonalUpLeft => {
-            map[[player.x - 1, player.y - 1]] = Tile::Player;
-            player.y -= 1;
-            player.x -= 1;
+            map[[player_location.0 - 1, player_location.1 - 1]] = Tile::Player;
         }
         Movement::DiagonalUpRight => {
-            map[[player.x - 1, player.y + 1]] = Tile::Player;
-            player.y += 1;
-            player.x -= 1;
+            map[[player_location.0 - 1, player_location.1 + 1]] = Tile::Player;
         }
         Movement::DiagonalDownLeft => {
-            map[[player.x + 1, player.y - 1]] = Tile::Player;
-            player.y -= 1;
-            player.x += 1;
+            map[[player_location.0 + 1, player_location.1 - 1]] = Tile::Player;
         }
         Movement::DiagonalDownRight => {
-            map[[player.x + 1, player.y + 1]] = Tile::Player;
-            player.y += 1;
-            player.x += 1;
+            map[[player_location.0 + 1, player_location.1 + 1]] = Tile::Player;
         }
     }
 }
@@ -110,6 +100,10 @@ fn determine_player_movement(map: &mut Map, user_input: &Option<KeyCode>, player
     }
 }
 
+fn find_player(map: &Map) -> Option<(usize, usize)> {
+    map.indexed_iter().find(|(_,x)| x == &&Tile::Player).map(|y| y.0)
+}
+
 fn keyboard_event() -> Option<KeyCode> {
     match read().unwrap() {
         Event::Key(event) => Some(event.code),
@@ -120,9 +114,6 @@ fn keyboard_event() -> Option<KeyCode> {
 
 fn main() {
     let mut player = GameEntity { x: 3, y: 3 };
-    // TODO: fix bug where player shows up twice on startup
-    // search the map for the player every time you call move_player
-    // to find the player instead of storing that data in GameEntity.
 
     // load game save if it exists
 

@@ -54,36 +54,31 @@ fn print_map(map: &Map) {
     write!(w, "\n\r");
 }
 
+ fn get_coordinate_modifiers (direction: Movement) -> (i32, i32) {
+    match direction {
+        Movement::Down => (1,0),
+        Movement::Up => (-1,0),
+        Movement::Left => (0,-1),
+        Movement::Right => (0, 1),
+        Movement::DiagonalUpLeft => (-1, -1),
+        Movement::DiagonalUpRight => (-1, 1),
+        Movement::DiagonalDownLeft => (1, -1),
+        Movement::DiagonalDownRight => (1, 1),
+    }
+ }
+
+fn get_coordinates(player_location: (usize, usize),  direction: Movement) -> (usize, usize) {
+    let coordinate_modifiers = get_coordinate_modifiers(direction);
+        ((player_location.0 as i32 + coordinate_modifiers.0) as usize , (player_location.1 as i32 + coordinate_modifiers.1) as usize)
+}
+
 fn move_player(map: &mut Map, direction: Movement, player: &mut GameEntity) {
     let player_location = find_player(map).unwrap();
+    let coordinates = get_coordinates(player_location, direction);
 
     map[[player_location.0, player_location.1]] = Tile::Floor;
-    match direction {
-        Movement::Down => {
-            map[[player_location.0 + 1, player_location.1]] = Tile::Player;
-        }
-        Movement::Up => {
-            map[[player_location.0 - 1, player_location.1]] = Tile::Player;
-        }
-        Movement::Left => {
-            map[[player_location.0, player_location.1 - 1]] = Tile::Player;
-        }
-        Movement::Right => {
-            map[[player_location.0, player_location.1 + 1]] = Tile::Player;
-        }
-        Movement::DiagonalUpLeft => {
-            map[[player_location.0 - 1, player_location.1 - 1]] = Tile::Player;
-        }
-        Movement::DiagonalUpRight => {
-            map[[player_location.0 - 1, player_location.1 + 1]] = Tile::Player;
-        }
-        Movement::DiagonalDownLeft => {
-            map[[player_location.0 + 1, player_location.1 - 1]] = Tile::Player;
-        }
-        Movement::DiagonalDownRight => {
-            map[[player_location.0 + 1, player_location.1 + 1]] = Tile::Player;
-        }
-    }
+    map[[coordinates.0, coordinates.1]] = Tile::Player;
+
 }
 
 fn determine_player_movement(map: &mut Map, user_input: &Option<KeyCode>, player: &mut GameEntity) {
@@ -116,6 +111,8 @@ fn main() {
     let mut player = GameEntity { x: 3, y: 3 };
 
     // load game save if it exists
+    // TODO: Check if player movement is valid,
+    // do not allow movement through walls
 
     let mut user_input = None;
     let mut rng = thread_rng();

@@ -76,8 +76,10 @@ fn move_player(map: &mut Map, direction: Movement, player: &mut GameEntity) {
     let player_location = find_player(map).unwrap();
     let coordinates = get_coordinates(player_location, direction);
 
-    map[[player_location.0, player_location.1]] = Tile::Floor;
-    map[[coordinates.0, coordinates.1]] = Tile::Player;
+    if map[[coordinates.0, coordinates.1]] == Tile::Floor {
+        map[[player_location.0, player_location.1]] = Tile::Floor;
+        map[[coordinates.0, coordinates.1]] = Tile::Player;
+    }
 
 }
 

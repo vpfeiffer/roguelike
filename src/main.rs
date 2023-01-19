@@ -5,8 +5,6 @@ use std::{io::{self, Read, Write, stdout}, fmt::{format, write}};
 use crossterm::{event::{read, Event, KeyCode}, terminal::{enable_raw_mode, disable_raw_mode}};
 use rand::{thread_rng, Rng};
 
-mod game_entities;
-pub use game_entities::*;
 mod map_entities;
 pub use map_entities::*;
 
@@ -72,7 +70,7 @@ fn get_coordinates(player_location: (usize, usize),  direction: Movement) -> (us
         ((player_location.0 as i32 + coordinate_modifiers.0) as usize , (player_location.1 as i32 + coordinate_modifiers.1) as usize)
 }
 
-fn move_player(map: &mut Map, direction: Movement, player: &mut GameEntity) {
+fn move_player(map: &mut Map, direction: Movement) {
     let player_location = find_player(map).unwrap();
     let coordinates = get_coordinates(player_location, direction);
 
@@ -83,16 +81,16 @@ fn move_player(map: &mut Map, direction: Movement, player: &mut GameEntity) {
 
 }
 
-fn determine_player_movement(map: &mut Map, user_input: &Option<KeyCode>, player: &mut GameEntity) {
+fn determine_player_movement(map: &mut Map, user_input: &Option<KeyCode>) {
     match user_input {
-        Some(KeyCode::Char('j')) => move_player(map, Movement::Down, player),
-        Some(KeyCode::Char('k')) => move_player(map, Movement::Up, player),
-        Some(KeyCode::Char('h')) => move_player(map, Movement::Left, player),
-        Some(KeyCode::Char('l')) => move_player(map, Movement::Right, player),
-        Some(KeyCode::Char('y')) => move_player(map, Movement::DiagonalUpLeft, player),
-        Some(KeyCode::Char('u')) => move_player(map, Movement::DiagonalUpRight, player),
-        Some(KeyCode::Char('b')) => move_player(map, Movement::DiagonalDownLeft, player),
-        Some(KeyCode::Char('n'))=> move_player(map, Movement::DiagonalDownRight, player),
+        Some(KeyCode::Char('j')) => move_player(map, Movement::Down),
+        Some(KeyCode::Char('k')) => move_player(map, Movement::Up),
+        Some(KeyCode::Char('h')) => move_player(map, Movement::Left),
+        Some(KeyCode::Char('l')) => move_player(map, Movement::Right),
+        Some(KeyCode::Char('y')) => move_player(map, Movement::DiagonalUpLeft),
+        Some(KeyCode::Char('u')) => move_player(map, Movement::DiagonalUpRight),
+        Some(KeyCode::Char('b')) => move_player(map, Movement::DiagonalDownLeft),
+        Some(KeyCode::Char('n'))=> move_player(map, Movement::DiagonalDownRight),
         _ => {}
     }
 }
@@ -110,11 +108,7 @@ fn keyboard_event() -> Option<KeyCode> {
 }
 
 fn main() {
-    let mut player = GameEntity { x: 3, y: 3 };
-
     // load game save if it exists
-    // TODO: Check if player movement is valid,
-    // do not allow movement through walls
 
     let mut user_input = None;
     let mut rng = thread_rng();
@@ -136,7 +130,7 @@ fn main() {
     enable_raw_mode();
     while user_input != Some(KeyCode::Char('q')) {
         user_input = keyboard_event();
-        determine_player_movement(&mut map, &user_input, &mut player);
+        determine_player_movement(&mut map, &user_input);
         print_map(&map);
     }
     disable_raw_mode();

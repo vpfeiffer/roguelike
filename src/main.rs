@@ -25,7 +25,7 @@ enum Movement {
     DiagonalDownRight,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Copy, Debug)]
 enum Tile {
     Floor,
     Wall,
@@ -40,6 +40,9 @@ impl Default for Tile {
 }
 
 type Map = Array2<Tile>;
+// maybe change Room type to struct with information
+// for creating a room later
+type Room = Array2<Tile>;
 
 fn print_map(map: &Map) {
     let mut w = io::BufWriter::new(io::stdout());
@@ -87,7 +90,6 @@ fn move_player(map: &mut Map, direction: Movement) {
         map[[player_location.0, player_location.1]] = Tile::Floor;
         map[[coordinates.0, coordinates.1]] = Tile::Player;
     }
-
 }
 
 fn determine_player_movement(map: &mut Map, user_input: &Option<KeyCode>) {
@@ -119,25 +121,71 @@ fn keyboard_event() -> Option<KeyCode> {
     }
 }
 
+fn create_map() -> ArrayBase<OwnedRepr<Tile>, ndarray::Dim<[usize; 2]>> {
+    let mut rng = thread_rng();
+    //let mut first_room = true;
+    let max_number_of_rooms = 8;
+    let min_number_of_rooms = 4;
+    //let room = generate_room(rng, first_room);
+    let mut first_room = true;
+    // Create map of fixed size and of wall tiles.
+    // later "carve" out rooms in the map by replacing the wall tiles with floor tiles
+    let mut map = Array::from_elem((40, 80), Tile::Wall);
+    for _ in 0..rng.gen_range(min_number_of_rooms..max_number_of_rooms) {
+        let room = generate_room(&mut rng, first_room);
+        add_room_to_map(room, &mut map);
+        // add room from generate_room to map
+        first_room = false;
+    }
+    return map;
+    // call add_room_to_map
+}
+
+fn add_room_to_map(room: Room, map: &mut Map) {
+    let mut rng = thread_rng();
+    let shape = room.shape();
+    let offset1 = rng.gen_range(0..40); // 0..height_map - height_room
+    let offset2 = rng.gen_range(0..80); // 0..witdth_map - width_room
+    for tile in room.indexed_iter() {
+        map[[tile.0 .0 + offset1, tile.0 .1 + offset2]] = *tile.1;
+    }
+    // replacing existing wall tiles with floor tiles in map of fixed size
+    // place rooms from left to right randomly in map array
+}
+
+fn find_empty_floor_tile(map: &Map) -> Option<(usize, usize)>{
+    map.indexed_iter()
+        .find(|(_, x)| x == &&Tile::Floor)
+        .map(|y| y.0)
+}
+
+fn place_player_on_map(map: &mut Map) {
+    // TODO: use map.dim() instead of map.width
+    let empty_tile = find_empty_floor_tile(map).unwrap();
+    let player_location = find_player(map).unwrap();
+    if map[[empty_tile.0, empty_tile.1]] == Tile::Floor {
+        map[[empty_tile.0, empty_tile.1]] = Tile::Player;
+    }
+}
+
+fn generate_room(rng: &mut ThreadRng, first_room: bool) -> Array2<Tile> {
+    let width = rng.gen_range(6..10);
+    let height = rng.gen_range(6..10);
+    let mut room = Array::from_shape_fn((height, width), |(i, j)| {
+        if i == 0 || j == 0 || j == width - 1 || i == height - 1 {
+            Tile::Wall
+        } //else if j == width - 2 && i == height - 2 && first_room {
+            //Tile::Player
+        //} 
+        else {
+            Tile::Floor
+        }
+    });
+    return room;
+}
+
 fn main() {
     // load game save if it exists
-
-    let mut user_input = None;
-    let mut rng = thread_rng();
-    let width = rng.gen_range(6..14);
-    let height = rng.gen_range(6..10);
-
-    let mut map = Array::from_shape_fn((height, width), |(i, j)| {
-            if i == 0 || j == 0 || j == width-1 || i == height-1 {
-                Tile::Wall
-            }
-            else if j == width-2 && i == height-2 {
-                Tile::Player
-            }
-            else {
-                Tile::Floor
-            }
-        });
 
     enable_raw_mode();
     while user_input != Some(KeyCode::Char('q')) {

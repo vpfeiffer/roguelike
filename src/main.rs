@@ -187,6 +187,27 @@ fn generate_room(rng: &mut ThreadRng, first_room: bool) -> Array2<Tile> {
 fn main() {
     // load game save if it exists
 
+    let mut user_input = None;
+    // Option 1:
+    // create rooms ahead of time, then add them to the map
+    // Array2, Array2, Array2 -> Array3
+
+    // Option 2:
+    // for loop to random number OR anonymous function OR map
+    // call generate_room()
+    // append all generated rooms to the map Array3
+    //
+    // Option 3:
+    // Array2 with all rooms
+    //
+    // Option 4:
+    // vector of Array2 with all rooms
+
+    //let mut actuaMap = Array3::<Tile>
+    // change all references to map after this to room
+    // since the type name has changed.
+
+    let mut map = create_map();
     enable_raw_mode();
     while user_input != Some(KeyCode::Char('q')) {
         user_input = keyboard_event();

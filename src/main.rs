@@ -1,9 +1,15 @@
 #![allow(unused)]
 use colored::Colorize;
-use ndarray::prelude::*;
-use std::{io::{self, Read, Write, stdout}, fmt::{format, write}};
-use crossterm::{event::{read, Event, KeyCode}, terminal::{enable_raw_mode, disable_raw_mode}};
-use rand::{thread_rng, Rng};
+use crossterm::{
+    event::{read, Event, KeyCode},
+    terminal::{disable_raw_mode, enable_raw_mode},
+};
+use ndarray::{prelude::*, OwnedRepr};
+use rand::{rngs::ThreadRng, thread_rng, Rng};
+use std::{
+    fmt::{format, write},
+    io::{self, stdout, Read, Write},
+};
 
 mod map_entities;
 pub use map_entities::*;
@@ -52,22 +58,25 @@ fn print_map(map: &Map) {
     write!(w, "\n\r");
 }
 
- fn get_coordinate_modifiers (direction: Movement) -> (i32, i32) {
+fn get_coordinate_modifiers(direction: Movement) -> (i32, i32) {
     match direction {
-        Movement::Down => (1,0),
-        Movement::Up => (-1,0),
-        Movement::Left => (0,-1),
+        Movement::Down => (1, 0),
+        Movement::Up => (-1, 0),
+        Movement::Left => (0, -1),
         Movement::Right => (0, 1),
         Movement::DiagonalUpLeft => (-1, -1),
         Movement::DiagonalUpRight => (-1, 1),
         Movement::DiagonalDownLeft => (1, -1),
         Movement::DiagonalDownRight => (1, 1),
     }
- }
+}
 
-fn get_coordinates(player_location: (usize, usize),  direction: Movement) -> (usize, usize) {
+fn get_coordinates(player_location: (usize, usize), direction: Movement) -> (usize, usize) {
     let coordinate_modifiers = get_coordinate_modifiers(direction);
-        ((player_location.0 as i32 + coordinate_modifiers.0) as usize , (player_location.1 as i32 + coordinate_modifiers.1) as usize)
+    (
+        (player_location.0 as i32 + coordinate_modifiers.0) as usize,
+        (player_location.1 as i32 + coordinate_modifiers.1) as usize,
+    )
 }
 
 fn move_player(map: &mut Map, direction: Movement) {
@@ -90,20 +99,23 @@ fn determine_player_movement(map: &mut Map, user_input: &Option<KeyCode>) {
         Some(KeyCode::Char('y')) => move_player(map, Movement::DiagonalUpLeft),
         Some(KeyCode::Char('u')) => move_player(map, Movement::DiagonalUpRight),
         Some(KeyCode::Char('b')) => move_player(map, Movement::DiagonalDownLeft),
-        Some(KeyCode::Char('n'))=> move_player(map, Movement::DiagonalDownRight),
+        Some(KeyCode::Char('n')) => move_player(map, Movement::DiagonalDownRight),
         _ => {}
     }
 }
 
 fn find_player(map: &Map) -> Option<(usize, usize)> {
-    map.indexed_iter().find(|(_,x)| x == &&Tile::Player).map(|y| y.0)
+    map.indexed_iter()
+        .find(|(_, x)| x == &&Tile::Player)
+        .map(|y| y.0)
+
 }
 
 fn keyboard_event() -> Option<KeyCode> {
     match read().unwrap() {
         Event::Key(event) => Some(event.code),
         //Event::Resize(width, height) => print!("New size {}x{}", width, height),
-        _ => None
+        _ => None,
     }
 }
 

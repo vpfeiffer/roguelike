@@ -123,10 +123,8 @@ fn keyboard_event() -> Option<KeyCode> {
 
 fn create_map() -> ArrayBase<OwnedRepr<Tile>, ndarray::Dim<[usize; 2]>> {
     let mut rng = thread_rng();
-    //let mut first_room = true;
     let max_number_of_rooms = 8;
     let min_number_of_rooms = 4;
-    //let room = generate_room(rng, first_room);
     let mut first_room = true;
     // Create map of fixed size and of wall tiles.
     // later "carve" out rooms in the map by replacing the wall tiles with floor tiles
@@ -134,12 +132,10 @@ fn create_map() -> ArrayBase<OwnedRepr<Tile>, ndarray::Dim<[usize; 2]>> {
     for _ in 0..rng.gen_range(min_number_of_rooms..max_number_of_rooms) {
         let room = generate_room(&mut rng, first_room);
         add_room_to_map(room, &mut map);
-        // add room from generate_room to map
         first_room = false;
     }
     place_player_on_map(&mut map);
     return map;
-    // call add_room_to_map
 }
 
 fn add_room_to_map(room: Room, map: &mut Map) {
@@ -150,8 +146,6 @@ fn add_room_to_map(room: Room, map: &mut Map) {
     for tile in room.indexed_iter() {
         map[[tile.0 .0 + offset1, tile.0 .1 + offset2]] = *tile.1;
     }
-    // replacing existing wall tiles with floor tiles in map of fixed size
-    // place rooms from left to right randomly in map array
 }
 
 fn find_empty_floor_tile(map: &Map) -> Option<(usize, usize)>{

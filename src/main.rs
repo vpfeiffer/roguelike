@@ -140,9 +140,9 @@ fn create_map() -> ArrayBase<OwnedRepr<Tile>, ndarray::Dim<[usize; 2]>> {
 
 fn add_room_to_map(room: Room, map: &mut Map) {
     let mut rng = thread_rng();
-    let shape = room.shape();
-    let offset1 = rng.gen_range(0..40); // 0..height_map - height_room
-    let offset2 = rng.gen_range(0..80); // 0..witdth_map - width_room
+    let room_dimensions = room.shape();
+    let offset1 = rng.gen_range(0..40 - room_dimensions[0]); // 0..height_map - height_room
+    let offset2 = rng.gen_range(0..80 - room_dimensions[1]); // 0..witdth_map - width_room
     for tile in room.indexed_iter() {
         map[[tile.0 .0 + offset1, tile.0 .1 + offset2]] = *tile.1;
     }

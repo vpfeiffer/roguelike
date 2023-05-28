@@ -137,6 +137,7 @@ fn create_map() -> ArrayBase<OwnedRepr<Tile>, ndarray::Dim<[usize; 2]>> {
         // add room from generate_room to map
         first_room = false;
     }
+    place_player_on_map(&mut map);
     return map;
     // call add_room_to_map
 }
@@ -162,7 +163,6 @@ fn find_empty_floor_tile(map: &Map) -> Option<(usize, usize)>{
 fn place_player_on_map(map: &mut Map) {
     // TODO: use map.dim() instead of map.width
     let empty_tile = find_empty_floor_tile(map).unwrap();
-    let player_location = find_player(map).unwrap();
     if map[[empty_tile.0, empty_tile.1]] == Tile::Floor {
         map[[empty_tile.0, empty_tile.1]] = Tile::Player;
     }
@@ -188,20 +188,8 @@ fn main() {
     // load game save if it exists
 
     let mut user_input = None;
-    // Option 1:
-    // create rooms ahead of time, then add them to the map
-    // Array2, Array2, Array2 -> Array3
-
-    // Option 2:
-    // for loop to random number OR anonymous function OR map
-    // call generate_room()
-    // append all generated rooms to the map Array3
-    //
-    // Option 3:
-    // Array2 with all rooms
-    //
-    // Option 4:
-    // vector of Array2 with all rooms
+    // TODO: call place_player_on_map() function in map
+    // creation
 
     //let mut actuaMap = Array3::<Tile>
     // change all references to map after this to room

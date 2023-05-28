@@ -174,9 +174,7 @@ fn generate_room(rng: &mut ThreadRng, first_room: bool) -> Array2<Tile> {
     let mut room = Array::from_shape_fn((height, width), |(i, j)| {
         if i == 0 || j == 0 || j == width - 1 || i == height - 1 {
             Tile::Wall
-        } //else if j == width - 2 && i == height - 2 && first_room {
-            //Tile::Player
-        //} 
+        }
         else {
             Tile::Floor
         }

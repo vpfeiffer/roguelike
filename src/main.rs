@@ -5,15 +5,25 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode},
 };
 use ndarray::{prelude::*, OwnedRepr};
-use rand::{rngs::ThreadRng, thread_rng, Rng};
+use rand::{prelude::*, distributions::WeightedIndex};
 use std::{
     fmt::{format, write},
     io::{self, stdout, Read, Write},
 };
 
-mod map_entities;
-pub use map_entities::*;
+//mod map_entities;
+//pub use map_entities::*;
 
+// TODO: somehow merge this data with the Room type
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct RoomCoordinates {
+    pub upper_left: (usize, usize),
+    pub upper_right: (usize, usize),
+    pub lower_left: (usize, usize),
+    pub lower_right: (usize, usize)
+}
+
+#[derive(Clone, PartialEq, Copy, Debug)]
 enum Movement {
     Up,
     Down,
@@ -134,6 +144,7 @@ fn create_map() -> ArrayBase<OwnedRepr<Tile>, ndarray::Dim<[usize; 2]>> {
         add_room_to_map(room, &mut map);
         first_room = false;
     }
+    add_hallway_to_map(&mut map);
     place_player_on_map(&mut map);
     return map;
 }
@@ -176,16 +187,103 @@ fn generate_room(rng: &mut ThreadRng, first_room: bool) -> Array2<Tile> {
     return room;
 }
 
+fn add_hallway_to_map(map: &mut Map) {
+    // search for two empty_tiles
+    // send coordinates to generate_hallway
+    for _ in 0..6 {
+        let mut entry = find_empty_floor_tile(map).unwrap();
+        path_find(map, entry);
+    }
+
+}
+
+fn valid_tile(tile: (usize, usize)) -> bool {
+    if tile.0 >= 39 || tile.1 >= 79 {
+        return false;
+    } else {
+        return true;
+    }
+
+}
+
+fn list_rooms(map: &Map) -> Vec<RoomCoordinates> {
+    // return a list of rooms in the map
+    // to be used with path_find()
+    // traverse map
+    // find floor tiles in a line, stop when you find a floor tile that's right before a wall tile
+    // for the width
+    // use indexed_iter
+
+    let mut rooms_list = Vec::new();
+    let map_iter = map.indexed_iter();
+    // These are now the option type
+    let mut upper_left = None;
+    let mut upper_right = None;
+    let mut lower_left = None; 
+    let mut lower_right = None;
+    dbg!(map.shape());
+    for (i,tile) in map_iter {
+        if tile == &Tile::Wall && i.1 + 1 < map.shape()[1] && upper_left == None && map[(i.0,i.1 +1 as i32 as usize)] == Tile::Floor {
+            upper_left = Some((i.0,i.1 + 1));
+            for j in 1..(map.shape()[0] - upper_left.unwrap().0) {
+                if dbg!(map[(upper_left.unwrap().0 + j, upper_left.unwrap().1)]) == Tile::Floor && upper_left.unwrap().0 + j < map.shape()[0] && lower_left == None && map[(upper_left.unwrap().0 + 1 as i32 as usize, i.1)] == Tile::Wall {
+                    lower_left = Some((upper_left.unwrap().0 + j, upper_left.unwrap().1));
+                }
+            }
+        }
+        if tile == &Tile::Floor && i.1 + 1 < map.shape()[1] && upper_right == None && map[(i.0,i.1 +1 as i32 as usize)] == Tile::Wall {
+            upper_right = Some(i);
+            for j in 0..map.shape()[1] {
+                if tile == &Tile::Floor && i.0 + j + 1 < map.shape()[0] && map[(i.0 + j + 1 as i32 as usize, i.1)] == Tile::Wall {
+                    lower_right = Some((i.0 + j, i.1));
+                }
+            }
+        }
+
+    }
+    
+    // TODO: change this return type to a vector of structs
+    rooms_list.push(RoomCoordinates { upper_left:upper_left.unwrap(), upper_right:upper_right.unwrap(), lower_left:lower_left.unwrap(), lower_right:lower_right.unwrap() });
+    if upper_left == None && upper_right == None && lower_left == None && lower_right == None {
+        return Vec::new();
+
+    }
+    return rooms_list;
+
+}
+
+fn path_find(map: &mut Map, mut path: (usize, usize)) {
+    let mut rng = thread_rng();
+    // NOTE: not true path finding yet. That is yet to come.
+    // TODO: weigh the tiles towards being created in the direction of the
+    // exit
+    // TODO: loop infinitely and break when the other room is reached.
+    let directions = [(Movement::Down, 4), (Movement::Up, 1), (Movement::Left, 2), (Movement::Right, 4), (Movement::DiagonalUpLeft, 1), (Movement::DiagonalUpRight, 1), (Movement::DiagonalDownLeft, 4), (Movement::DiagonalDownRight, 4)];
+    let dist = WeightedIndex::new(directions.iter().map(|direction| direction.1)).unwrap();
+    // Refactor this later
+    for _ in 0..20 {
+        let direction = directions[dist.sample(&mut rng)].0;
+        let modifiers = get_coordinate_modifiers(direction);
+        let new_path = ((path.0 as i32 + modifiers.0) as usize, (path.1 as i32 + modifiers.1) as usize);
+        while valid_tile(new_path) == false {
+            let direction = directions[dist.sample(&mut rng)].0;
+            let modifiers = get_coordinate_modifiers(direction);
+            let new_path = ((path.0 as i32 + modifiers.0) as usize, (path.1 as i32 + modifiers.1) as usize);
+        }
+        path = ((path.0 as i32 + modifiers.0) as usize, (path.1 as i32 + modifiers.1) as usize);
+        map[[path.0, path.1]] = Tile::Floor;
+    }
+}
+
 fn main() {
     // load game save if it exists
 
-    let mut user_input = None;
-    // TODO: call place_player_on_map() function in map
-    // creation
+    // TODO: Add hallways connecting each room.
+    //       Make them narrow and long rooms that
+    //       go from the center of one room to another.
+    // TODO: Add more rooms
 
-    //let mut actuaMap = Array3::<Tile>
-    // change all references to map after this to room
-    // since the type name has changed.
+    let mut user_input = None;
 
     let mut map = create_map();
     enable_raw_mode();
@@ -195,4 +293,36 @@ fn main() {
         print_map(&map);
     }
     disable_raw_mode();
+        dbg!(list_rooms(&arr2(&[[Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall],
+                                        [Tile::Wall, Tile::Floor, Tile::Floor, Tile::Wall],
+                                        [Tile::Wall, Tile::Floor, Tile::Floor, Tile::Wall],
+                                        [Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall]
+
+        ])));
 }
+
+#[cfg(test)]
+mod tests {
+    // TODO: write test for no rooms
+    // TODO: write test for multiple rooms
+    use super::*;
+
+    #[test]
+    fn test_list_rooms() {
+        dbg!(list_rooms(&arr2(&[[Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall],
+                                        [Tile::Wall, Tile::Floor, Tile::Floor, Tile::Wall],
+                                        [Tile::Wall, Tile::Floor, Tile::Floor, Tile::Wall],
+                                        [Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall]
+        ])));
+        assert_eq!(list_rooms(&arr2(&[[Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall],
+                                        [Tile::Wall, Tile::Floor, Tile::Floor, Tile::Wall],
+                                        [Tile::Wall, Tile::Floor, Tile::Floor, Tile::Wall],
+                                        [Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall]
+                                ])), [RoomCoordinates { upper_left:(1,1), upper_right:(1,2), lower_left:(2,1), lower_right:(2,2) }]);
+                                //])), [(1 as usize,1 as usize),(1 as usize,2 as usize),(2 as usize,1 as usize),(2 as usize, 2 as usize)]);
+
+    }
+
+
+}
+

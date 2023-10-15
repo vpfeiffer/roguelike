@@ -166,7 +166,6 @@ fn find_empty_floor_tile(map: &Map) -> Option<(usize, usize)>{
 }
 
 fn place_player_on_map(map: &mut Map) {
-    // TODO: use map.dim() instead of map.width
     let empty_tile = find_empty_floor_tile(map).unwrap();
     if map[[empty_tile.0, empty_tile.1]] == Tile::Floor {
         map[[empty_tile.0, empty_tile.1]] = Tile::Player;
@@ -286,12 +285,6 @@ fn main() {
         print_map(&map);
     }
     disable_raw_mode();
-        dbg!(list_rooms(&arr2(&[[Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall],
-                                        [Tile::Wall, Tile::Floor, Tile::Floor, Tile::Wall],
-                                        [Tile::Wall, Tile::Floor, Tile::Floor, Tile::Wall],
-                                        [Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall]
-
-        ])));
 }
 
 #[cfg(test)]
@@ -307,8 +300,6 @@ mod tests {
                                         [Tile::Wall, Tile::Floor, Tile::Floor, Tile::Wall],
                                         [Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall]
                                 ])), [RoomCoordinates { upper_left:(1,1), upper_right:(1,2), lower_left:(2,1), lower_right:(2,2) }]);
-                                //])), [(1 as usize,1 as usize),(1 as usize,2 as usize),(2 as usize,1 as usize),(2 as usize, 2 as usize)]);
-
     }
 
 
